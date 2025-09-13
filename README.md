@@ -4,7 +4,7 @@
 A modern reimagining of a classic PHP image gallery
 Small, opinionated, easy to run — but built for today’s web.
 
-What is this?
+✨ What is this?
 
 This project takes inspiration from the old-school, single-file PHP image galleries that powered countless small websites.
 It keeps their simplicity and “just works” spirit, but rebuilds the stack with today’s needs in mind:
@@ -21,11 +21,14 @@ It keeps their simplicity and “just works” spirit, but rebuilds the stack wi
 - Logout & session management with auto-expiry
 - Navbar for consistent navigation
 - SEO friendly search bar
+
 ## Tech Stack
 
-- **Frontend**: Next.js 13 (App Router), React, Tailwind CSS
-- **Backend / Database**: Supabase (PostgreSQL + Auth + Storage)
-- **Deployment**: AWS
+- **Frontend**: HTML, CSS, Javascript, Next.js 13 (App Router), React
+- **Backend**: Node.js (Express), JWT Auth
+- **Database**: MongoDB Atlas (cloud)
+- **Storage**: AWS S3 (for images)
+- **Deployment**: AWS EC2
 
 [![My Skills](https://skillicons.dev/icons?i=nextjs,html,react,tailwind,css,mongo,aws,docker,)](https://skillicons.dev)
 
@@ -62,11 +65,12 @@ The app will be available at [http://localhost:3000](http://localhost:5000)
 
 ## Acknowledgements
 - [Next.js](https://nextjs.org/)
-- [Supabase](https://supabase.com/)
+- [HTML](https://developer.mozilla.org/en-US/docs/Web/HTML), [CSS](https://developer.mozilla.org/en-US/docs/Web/CSS), [JavaScript](https://developer.mozilla.org/en-US/docs/Web/JavaScript), [Next.js 13 (App Router)](https://nextjs.org/), [React](https://reactjs.org/)  
+- [Node.js](https://nodejs.org/) ([Express](https://expressjs.com/)), [JWT Authentication](https://jwt.io/)  
+- [MongoDB Atlas](https://www.mongodb.com/cloud/atlas)  
+- [AWS S3](https://aws.amazon.com/s3/) (for images)  
+- [AWS EC2](https://aws.amazon.com/ec2/)  
 - [Tailwind CSS](https://tailwindcss.com/)
-
-
-
 
 ## Authors
 
