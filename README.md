@@ -9,6 +9,7 @@ Small, opinionated, easy to run — but built for today’s web.
 This project takes inspiration from the old-school, single-file PHP image galleries that powered countless small websites.
 It keeps their simplicity and “just works” spirit, but rebuilds the stack with today’s needs in mind:
 
+
 ## Features
 
 - Login & Register with secure backend token support
@@ -21,6 +22,9 @@ It keeps their simplicity and “just works” spirit, but rebuilds the stack wi
 - Logout & session management with auto-expiry
 - Navbar for consistent navigation
 - SEO friendly search bar
+
+## Demonstration Video
+https://drive.google.com/file/d/1goCeNKgLpmemnUCLM19GclU1ckAV9SpE/view?usp=drivesdk
 
 ## Tech Stack
 
