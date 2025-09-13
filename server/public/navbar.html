@@ -1,0 +1,42 @@
+<nav>
+  <ul>
+    <li><a href="gallery.html" id="nav-gallery">Gallery</a></li>
+    <li><a href="upload.html" id="nav-upload">Upload</a></li>
+    <li><a href="profile.html" id="nav-profile">Profile</a></li>
+    <li style="float:right"><button id="signout-btn">Sign Out</button></li>
+  </ul>
+</nav>
+
+<style>
+  nav {
+    background: #222;
+    padding: 10px;
+  }
+  nav ul {
+    list-style: none;
+    display: flex;
+    margin: 0;
+    padding: 0;
+  }
+  nav ul li {
+    margin-right: 20px;
+  }
+  nav a {
+    color: white;
+    text-decoration: none;
+    padding: 5px 10px;
+  }
+  nav a.active {
+    font-weight: bold;
+    color: #ff6600;
+    border-bottom: 2px solid #ff6600;
+  }
+  #signout-btn {
+    background: #ff4444;
+    border: none;
+    color: white;
+    padding: 6px 12px;
+    cursor: pointer;
+    border-radius: 5px;
+  }
+</style>

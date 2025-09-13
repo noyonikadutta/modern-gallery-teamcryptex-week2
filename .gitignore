@@ -1,0 +1,46 @@
+# Ignore node dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Logs
+logs
+*.log
+*.out
+*.err
+
+# Build & dist (if any build step is added later)
+dist/
+build/
+
+# OS-specific
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDEs & Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+*.swn
+*.bak
+*.tmp
+
+# Coverage / test output
+coverage/
+.nyc_output/
+
+# Ignore lock files if you prefer clean installs
+package-lock.json
+yarn.lock
+
+# Git folder (already versioned, don’t include inside zip)
+.git/

@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register | ImageGallery</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#ffc62a',
+                        secondary: '#009593',
+                        dark: '#202d3b',
+                        accent: '#f15833',
+                    }
+                }
+            }
+        }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+    <script src="https://unpkg.com/feather-icons"></script>
+</head>
+<body class="bg-gray-100 dark:bg-dark dark:text-white transition-colors duration-300">
+    
+  <div id="navbar"></div>
+
+    <div id="root"></div>
+    <!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Register | ImageGallery</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#ffc62a',
+            secondary: '#009593',
+            dark: '#202d3b',
+            accent: '#f15833',
+          }
+        }
+      }
+    }
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+  <script src="https://unpkg.com/feather-icons"></script>
+</head>
+<body class="bg-gray-100 dark:bg-dark dark:text-white transition-colors duration-300">
+  <div id="root"></div>
+  <script type="module">
+    document.getElementById('root').innerHTML = `
+      <div class="min-h-screen flex flex-col">
+        <header class="bg-white dark:bg-gray-800 shadow-md">
+          <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+            <a href="index.html" class="text-2xl font-bold text-primary">ImageGallery</a>
+            <nav class="flex items-center space-x-6">
+              <button id="themeToggle" class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700">
+                <i data-feather="moon" class="hidden dark:block"></i>
+                <i data-feather="sun" class="dark:hidden"></i>
+              </button>
+              <a href="login.html" class="hover:text-primary">Login</a>
+            </nav>
+          </div>
+        </header>
+        <main class="flex-grow flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+          <div class="w-full max-w-md space-y-8">
+            <div>
+              <h2 class="mt-6 text-center text-3xl font-bold">Create your account</h2>
+            </div>
+            <form class="mt-8 space-y-6" id="registerForm">
+              <div class="rounded-md shadow-sm space-y-4">
+                <input id="username" name="username" type="text" required placeholder="Username"
+                  class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-t-md focus:ring-primary focus:border-primary"/>
+                <input id="email" name="email" type="email" required placeholder="Email address"
+                  class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-primary focus:border-primary"/>
+                <input id="password" name="password" type="password" required placeholder="Password"
+                  class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-primary focus:border-primary"/>
+                <input id="confirm-password" name="confirm-password" type="password" required placeholder="Confirm Password"
+                  class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-b-md focus:ring-primary focus:border-primary"/>
+              </div>
+              <button type="submit"
+                class="w-full py-2 px-4 rounded-md text-white bg-primary hover:bg-yellow-500 focus:ring-2 focus:ring-offset-2 focus:ring-primary">
+                Register
+              </button>
+            </form>
+          </div>
+        </main>
+      </div>
+    `;
+
+    // Theme toggle
+    const themeToggle = document.getElementById('themeToggle');
+    themeToggle.addEventListener('click', () => {
+      document.documentElement.classList.toggle('dark');
+      localStorage.setItem('darkMode', document.documentElement.classList.contains('dark'));
+    });
+    if (localStorage.getItem('darkMode') === 'true') {
+      document.documentElement.classList.add('dark');
+    }
+
+    // Handle registration
+    document.getElementById('registerForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const username = document.getElementById('username').value;
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      const confirmPassword = document.getElementById('confirm-password').value;
+
+      if (password !== confirmPassword) {
+        alert("Passwords don't match!");
+        return;
+      }
+
+      // Save to localStorage (fake DB)
+      localStorage.setItem('registeredUser', JSON.stringify({ username, email, password }));
+      alert("Signup successful! Please login now.");
+      window.location.href = "login.html";
+    });
+
+    feather.replace();
+  </script>
+</body>
+</html>
+
+</body>
+</html>

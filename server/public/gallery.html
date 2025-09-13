@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Gallery — ImageGallery</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = { theme: { extend: { colors: { primary:'#ffc62a', secondary:'#009593', dark:'#202d3b', accent:'#f15833'}}}}; 
+  </script>
+</head>
+<body class="bg-gray-100 dark:bg-dark dark:text-white">
+  <header class="bg-white dark:bg-gray-800 shadow-md">
+    <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+      <a href="index.html" class="text-2xl font-bold text-primary">ImageGallery</a>
+      <nav class="flex items-center gap-4">
+        <a href="upload.html" class="bg-primary text-white px-3 py-2 rounded-md">Upload</a>
+        <a href="profile.html" class="hover:text-primary">Profile</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container mx-auto px-4 py-8">
+    <h1 class="text-3xl font-bold mb-6">Image Gallery</h1>
+    <div id="galleryGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"></div>
+  </main>
+
+  <script src="https://unpkg.com/feather-icons"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      feather.replace();
+      if (localStorage.getItem('darkMode') === 'true') document.documentElement.classList.add('dark');
+
+      const grid = document.getElementById('galleryGrid');
+
+      function render() {
+        const images = JSON.parse(localStorage.getItem('mg_images_v2') || '[]');
+        grid.innerHTML = '';
+        images.forEach(img => {
+          const card = document.createElement('div');
+          card.className = 'bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden';
+          card.innerHTML = `
+            <div class="relative">
+              <img src="${img.imageUrl}" class="w-full h-48 object-cover" loading="lazy">
+            </div>
+            <div class="p-4">
+              <h3 class="font-bold text-lg mb-1">${img.title || 'Untitled'}</h3>
+              <p class="text-xs text-gray-500 mb-2">By ${img.uploader || 'anon'}</p>
+            </div>
+          `;
+          grid.appendChild(card);
+        });
+      }
+
+      render();
+    });
+  </script>
+</body>
+</html>

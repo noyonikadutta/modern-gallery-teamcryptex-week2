@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Upload — ImageGallery</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = { theme: { extend: { colors: { primary:'#ffc62a', secondary:'#009593', dark:'#202d3b', accent:'#f15833'}}}}; 
+  </script>
+</head>
+<body class="bg-gray-100 dark:bg-dark dark:text-white">
+  <header class="bg-white dark:bg-gray-800 shadow-md">
+    <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+      <a href="index.html" class="text-2xl font-bold text-primary">ImageGallery</a>
+      <nav class="flex items-center gap-4">
+        <a href="gallery.html" class="hover:text-primary">Gallery</a>
+        <a href="profile.html" class="hover:text-primary">Profile</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container mx-auto px-4 py-8">
+    <div class="max-w-3xl mx-auto">
+      <h1 class="text-3xl font-bold mb-6">Upload New Images</h1>
+
+      <div id="dropZone" class="border-2 border-dashed p-8 rounded-md text-center mb-4">
+        <input id="fileInput" type="file" accept="image/*" multiple class="hidden">
+        <p>Drag & drop images here or <label for="fileInput" class="cursor-pointer text-primary">browse</label></p>
+        <div id="previewList" class="mt-4 grid grid-cols-1 gap-4"></div>
+      </div>
+
+      <div class="mb-4 flex items-center gap-3">
+        <label class="flex items-center gap-2"><input id="watermarkToggle" type="checkbox"> Add watermark</label>
+        <label class="flex items-center gap-2"><input id="autotagToggle" type="checkbox"> Auto-tag</label>
+        <label class="flex items-center gap-2"><input id="privateToggle" type="checkbox"> Private</label>
+      </div>
+
+      <div class="flex gap-3 mb-4">
+        <input id="albumInput" placeholder="Album name" class="flex-1 p-2 border rounded-md dark:bg-gray-700">
+        <input id="tagsInput" placeholder="Tags (comma separated)" class="flex-1 p-2 border rounded-md dark:bg-gray-700">
+      </div>
+
+      <div class="mb-4">
+        <label>Schedule (optional)</label>
+        <input id="scheduledAt" type="datetime-local" class="p-2 border rounded-md dark:bg-gray-700">
+      </div>
+
+      <div class="flex items-center gap-3">
+        <button id="uploadBtn" class="bg-primary text-white px-6 py-2 rounded-md">Upload</button>
+        <button id="saveDraft" class="px-4 py-2 border rounded-md">Save Draft</button>
+      </div>
+
+      <div id="progressArea" class="mt-4"></div>
+    </div>
+  </main>
+
+  <script src="https://unpkg.com/feather-icons"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      feather.replace();
+      if (localStorage.getItem('darkMode') === 'true') document.documentElement.classList.add('dark');
+
+      const fileInput = document.getElementById('fileInput');
+      const previewList = document.getElementById('previewList');
+      const dropZone = document.getElementById('dropZone');
+      const uploadBtn = document.getElementById('uploadBtn');
+      const saveDraft = document.getElementById('saveDraft');
+
+      const watermarkToggle = document.getElementById('watermarkToggle');
+      const autotagToggle = document.getElementById('autotagToggle');
+      const privateToggle = document.getElementById('privateToggle');
+
+      // handle drag/drop
+      ['dragenter','dragover'].forEach(ev => dropZone.addEventListener(ev, e => { e.preventDefault(); dropZone.classList.add('bg-gray-50','dark:bg-gray-700'); }));
+      ['dragleave','drop'].forEach(ev => dropZone.addEventListener(ev, e => { e.preventDefault(); dropZone.classList.remove('bg-gray-50','dark:bg-gray-700'); }));
+      dropZone.addEventListener('drop', e => handleFiles(e.dataTransfer.files));
+      fileInput.addEventListener('change', e => handleFiles(e.target.files));
+
+      function handleFiles(files) {
+        previewList.innerHTML = '';
+        for (const file of files) {
+          const id = Date.now() + Math.random();
+          const reader = new FileReader();
+          const item = document.createElement('div');
+          item.className = 'flex items-start gap-3 bg-white dark:bg-gray-800 p-3 rounded';
+          item.innerHTML = `
+            <img src="" class="w-32 h-24 object-cover rounded" id="img_${id}">
+            <div class="flex-1">
+              <input placeholder="Title" class="w-full mb-2 p-1 border rounded" id="title_${id}">
+              <textarea placeholder="Description" rows="2" class="w-full p-1 border rounded" id="desc_${id}"></textarea>
+            </div>`;
+          previewList.appendChild(item);
+          reader.onload = ev => {
+            document.getElementById(`img_${id}`).src = ev.target.result;
+            item._dataUrl = ev.target.result;
+            item._file = file;
+            item._id = id;
+          };
+          reader.readAsDataURL(file);
+        }
+      }
+
+      // save draft
+      saveDraft.addEventListener('click', () => {
+        const drafts = JSON.parse(localStorage.getItem('mg_drafts_v2') || '[]');
+        const items = Array.from(previewList.children).map(ch => ({
+          title: ch.querySelector('input')?.value || '',
+          desc: ch.querySelector('textarea')?.value || '',
+          dataUrl: ch._dataUrl
+        }));
+        drafts.unshift({ id: Date.now(), items, createdAt: new Date().toISOString(), user: localStorage.getItem('currentUser') || 'local' });
+        localStorage.setItem('mg_drafts_v2', JSON.stringify(drafts));
+        alert('Draft saved locally');
+      });
+
+      // upload handler
+      uploadBtn.addEventListener('click', async () => {
+        const children = Array.from(previewList.children);
+        if (children.length === 0) return alert('No files selected');
+
+        const tags = (document.getElementById('tagsInput').value || '').split(',').map(s=>s.trim()).filter(Boolean);
+        const album = document.getElementById('albumInput').value || null;
+        const privacy = privateToggle.checked ? 'private' : 'public';
+        const scheduleAt = document.getElementById('scheduledAt').value || null;
+        const watermark = watermarkToggle.checked;
+
+        let gallery = JSON.parse(localStorage.getItem('mg_images_v2') || '[]');
+
+        for (const c of children) {
+          let autotags = [];
+          if (autotagToggle.checked && c._dataUrl) autotags = ["sample-tag1","sample-tag2"];
+          gallery.unshift({
+            id: Date.now() + Math.random(),
+            imageUrl: c._dataUrl,
+            title: c.querySelector('input')?.value || 'Untitled',
+            description: c.querySelector('textarea')?.value || '',
+            uploader: localStorage.getItem('currentUser') || 'local',
+            likes: 0,
+            comments: [],
+            tags: [...tags, ...autotags],
+            album, privacy, watermark, scheduleAt,
+            createdAt: new Date().toISOString()
+          });
+        }
+
+        localStorage.setItem('mg_images_v2', JSON.stringify(gallery));
+        alert('Upload successful!');
+        window.location.href = 'gallery.html';
+      });
+    });
+  </script>
+</body>
+</html>

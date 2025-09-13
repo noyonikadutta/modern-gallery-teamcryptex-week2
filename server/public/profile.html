@@ -1,0 +1,117 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Profile</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 dark:bg-dark dark:text-white">
+  
+  <div id="navbar"></div>
+
+  <header class="bg-white dark:bg-gray-800 shadow-md">
+    <div class="container mx-auto p-4 flex justify-between items-center">
+      <a href="index.html" class="font-bold text-primary">ImageGallery</a>
+      <nav><a href="gallery.html" class="hover:text-primary">Gallery</a></nav>
+    </div>
+  </header>
+
+  <main class="container mx-auto p-6">
+    <div class="flex gap-6">
+      <div class="w-1/3 bg-white dark:bg-gray-800 p-4 rounded">
+        <div class="flex flex-col items-center gap-3">
+          <img id="profileAvatar" src="" class="w-32 h-32 rounded-full object-cover bg-gray-200"/>
+          <input id="avatarInput" type="file" accept="image/*" class="hidden"/>
+          <button id="changeAvatar" class="px-3 py-1 border rounded">Change Avatar</button>
+          <h2 id="profileName" class="font-bold text-xl"></h2>
+          <p id="profileEmail" class="text-sm text-gray-500"></p>
+          <p id="followersCount" class="text-sm mt-2"></p>
+          <button id="followBtn" class="bg-primary text-white px-3 py-1 rounded hidden">Follow</button>
+        </div>
+        <div class="mt-4">
+          <h3 class="font-semibold">Bio</h3>
+          <textarea id="bioInput" rows="4" class="w-full p-2 border rounded mt-2 dark:bg-gray-700"></textarea>
+          <button id="saveBio" class="mt-2 px-3 py-1 bg-primary text-white rounded">Save</button>
+        </div>
+      </div>
+
+      <div class="flex-1">
+        <h3 class="text-xl font-bold mb-3">My Uploads</h3>
+        <div id="myUploads" class="grid grid-cols-1 sm:grid-cols-2 gap-4"></div>
+      </div>
+    </div>
+  </main>
+
+  <script src="app.js" defer></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const avatar = document.getElementById('profileAvatar');
+      const name = document.getElementById('profileName');
+      const emailEl = document.getElementById('profileEmail');
+      const bio = document.getElementById('bioInput');
+      const uploadsEl = document.getElementById('myUploads');
+      const avatarInput = document.getElementById('avatarInput');
+
+      const cur = localStorage.getItem('currentUser') || 'local';
+      const users = JSON.parse(localStorage.getItem('mg_users_v2')||'[]');
+      const me = users.find(u => u.email === cur) || { username: cur, email: cur, avatar: '', bio: '' };
+
+      avatar.src = me.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(me.username||me.email)}&background=ffc62a`;
+      name.textContent = me.username || me.email;
+      emailEl.textContent = me.email;
+      bio.value = me.bio || '';
+
+      document.getElementById('changeAvatar').addEventListener('click', () => avatarInput.click());
+      avatarInput.addEventListener('change', (e) => {
+        const f = e.target.files[0];
+        const r = new FileReader();
+        r.onload = () => {
+          me.avatar = r.result;
+          avatar.src = me.avatar;
+          // save to local users
+          const users = JSON.parse(localStorage.getItem('mg_users_v2')||'[]');
+          const idx = users.findIndex(u=>u.email===me.email); if (idx>-1) users[idx]=me; else users.push(me);
+          localStorage.setItem('mg_users_v2', JSON.stringify(users));
+        };
+        r.readAsDataURL(f);
+      });
+
+      document.getElementById('saveBio').addEventListener('click', () => {
+        me.bio = bio.value;
+        const users2 = JSON.parse(localStorage.getItem('mg_users_v2')||'[]');
+        const idx = users2.findIndex(u=>u.email===me.email); if (idx>-1) users2[idx]=me; else users2.push(me);
+        localStorage.setItem('mg_users_v2', JSON.stringify(users2));
+        alert('Saved');
+      });
+
+      // render my uploads
+      const myImgs = (MG.loadLocalImages()||[]).filter(i => (i.uploader === me.email) || (i.uploader === me.username));
+      uploadsEl.innerHTML = myImgs.map(i => `<div class="bg-white dark:bg-gray-800 p-2 rounded flex gap-2"><img src="${i.thumbUrl||i.imageUrl||'https://picsum.photos/seed/'+i.id+'/200/140'}" class="w-36 h-24 object-cover rounded"><div class="flex-1"><div class="font-semibold">${i.title}</div><div class="text-xs text-gray-500">${timeAgo(i.createdAt)}</div><div class="mt-2"><button class="edit-meta px-2 py-1 border rounded mr-2" data-id="${i.id}">Edit</button><button class="del px-2 py-1 border rounded" data-id="${i.id}">Delete</button></div></div></div>`).join('');
+
+      uploadsEl.querySelectorAll('.del').forEach(btn => btn.addEventListener('click', async (e)=>{
+        if (!confirm('Delete this image?')) return;
+        const id = e.currentTarget.dataset.id;
+        await MG.deleteImageApi(id);
+        const arr = MG.loadLocalImages().filter(x => x.id != id);
+        localStorage.setItem('mg_images_v2', JSON.stringify(arr));
+        location.reload();
+      }));
+
+      uploadsEl.querySelectorAll('.edit-meta').forEach(btn => btn.addEventListener('click', (e) => {
+        const id = e.currentTarget.dataset.id;
+        const imgs = MG.loadLocalImages();
+        const img = imgs.find(i => i.id == id);
+        const newTitle = prompt('New title', img.title || '');
+        const newDesc = prompt('New description', img.description || '');
+        if (newTitle !== null) {
+          img.title = newTitle;
+          img.description = newDesc;
+          localStorage.setItem('mg_images_v2', JSON.stringify(imgs));
+          alert('Saved');
+          location.reload();
+        }
+      }));
+    });
+  </script>
+</body>
+</html>

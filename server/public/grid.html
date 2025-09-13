@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>ImageGallery — Home</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: { primary: '#ffc62a', secondary: '#009593', dark: '#202d3b', accent: '#f15833'}
+        }
+      }
+    }
+  </script>
+  <link rel="manifest" href="manifest.json">
+</head>
+<body class="bg-gray-100 dark:bg-dark dark:text-white transition-colors duration-300">
+  
+  <div id="navbar"></div>
+
+  <header class="bg-white dark:bg-gray-800 shadow-md">
+    <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+      <a href="index.html" class="text-2xl font-bold text-primary">ImageGallery</a>
+      <nav class="flex items-center gap-4">
+        <a href="gallery.html" class="hover:text-primary">Gallery</a>
+        <a href="upload.html" class="bg-primary text-white px-3 py-2 rounded-md">Upload</a>
+        <a href="profile.html" class="hover:text-primary">Profile</a>
+        <button id="notifBtn" class="relative">
+          <span data-feather="bell"></span>
+          <span id="notifCount" class="absolute -top-1 -right-1 bg-red-500 text-xs text-white rounded-full px-1 hidden">0</span>
+        </button>
+        <button id="themeToggle" class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700">
+          <i data-feather="moon" class="hidden dark:block"></i>
+          <i data-feather="sun" class="dark:hidden"></i>
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container mx-auto px-4 py-8">
+    <div class="flex gap-6">
+      <div class="flex-1">
+        <h1 class="text-4xl font-bold mb-2">Discover beautiful images</h1>
+        <p class="mb-6 text-gray-600 dark:text-gray-300">Search, explore, and upload your work.</p>
+        <div class="mb-6">
+          <input id="searchHome" type="search" placeholder="Search by title / tag / uploader" class="w-full p-3 border rounded-md dark:bg-gray-700">
+        </div>
+
+        <h2 class="text-2xl font-semibold mb-4">Featured</h2>
+        <div id="featuredGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6"></div>
+      </div>
+
+      <aside class="w-80">
+        <div class="bg-white dark:bg-gray-800 p-4 rounded-md shadow mb-4">
+          <h3 class="font-semibold mb-2">Trending</h3>
+          <div id="trendingList" class="space-y-2"></div>
+        </div>
+
+        <div class="bg-white dark:bg-gray-800 p-4 rounded-md shadow">
+          <h3 class="font-semibold mb-2">Tags</h3>
+          <div id="tagCloud" class="flex flex-wrap gap-2"></div>
+        </div>
+      </aside>
+    </div>
+  </main>
+
+  <script src="https://unpkg.com/feather-icons"></script>
+  <script src="app.js" defer></script>
+  <script>
+    // Page-specific init (UI wiring)
+    document.addEventListener('DOMContentLoaded', async () => {
+      feather.replace();
+
+      // theme toggle
+      const themeToggle = document.getElementById('themeToggle');
+      themeToggle.addEventListener('click', () => {
+        document.documentElement.classList.toggle('dark');
+        localStorage.setItem('darkMode', document.documentElement.classList.contains('dark'));
+      });
+      if (localStorage.getItem('darkMode') === 'true') document.documentElement.classList.add('dark');
+
+      // load featured images (first few from gallery)
+      const imgs = await MG.fetchGallery({ page: 1, limit: 9 }) || MG.loadLocalImages();
+      const featuredGrid = document.getElementById('featuredGrid');
+      featuredGrid.innerHTML = imgs.slice(0,6).map(i => `
+        <div class="bg-white dark:bg-gray-800 rounded-lg overflow-hidden shadow">
+          <img src="${i.imageUrl || i.img || 'https://picsum.photos/seed/'+i.id+'/600/400'}" class="w-full h-48 object-cover" loading="lazy">
+          <div class="p-3">
+            <h4 class="font-semibold">${i.title || 'Untitled'}</h4>
+            <p class="text-xs text-gray-500">${i.uploader || i.uploader || 'anon'}</p>
+          </div>
+        </div>
+      `).join('');
+
+      // trending
+      const trending = MG.computeTrending().slice(0,6);
+      const tEl = document.getElementById('trendingList');
+      tEl.innerHTML = trending.map(img => `<div class="flex items-center gap-3"><img src="${img.thumbUrl||img.imageUrl||img.img||'https://picsum.photos/seed/'+img.id+'/80/60'}" class="w-12 h-8 object-cover rounded"/><div><div class="text-sm font-medium">${img.title}</div><div class="text-xs text-gray-500">${(img.likes||0)} likes</div></div></div>`).join('');
+
+      // tag cloud
+      const tags = {};
+      MG.loadLocalImages().forEach(i => (i.tags||[]).forEach(t => tags[t]=(tags[t]||0)+1));
+      const tagCloud = document.getElementById('tagCloud');
+      tagCloud.innerHTML = Object.keys(tags).slice(0,30).map(t => `<button class="px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded text-sm tag-pill" data-tag="${t}">${t} (${tags[t]})</button>`).join('');
+
+      document.querySelectorAll('.tag-pill').forEach(btn => btn.addEventListener('click', e => {
+        const tag = e.currentTarget.dataset.tag;
+        location.href = `gallery.html?tag=${encodeURIComponent(tag)}`;
+      }));
+
+      // search
+      document.getElementById('searchHome').addEventListener('input', async (e) => {
+        const q = e.target.value.trim();
+        const results = await MG.searchImages(q);
+        const grid = document.getElementById('featuredGrid');
+        grid.innerHTML = results.slice(0,9).map(i => `<div class="bg-white dark:bg-gray-800 rounded-lg overflow-hidden shadow"><img src="${i.imageUrl||i.img||'https://picsum.photos/seed/'+i.id+'/600/400'}" class="w-full h-48 object-cover"/><div class="p-3"><h4 class="font-semibold">${i.title}</h4></div></div>`).join('');
+      });
+
+      // notifications count
+      function refreshNotifs() {
+        const n = (MG.loadLocalImages && MG.loadLocalImages()) ? (JSON.parse(localStorage.getItem('mg_notifs_v2')||'[]').filter(n=>!n.read).length) : 0;
+        const el = document.getElementById('notifCount');
+        if (n>0) { el.classList.remove('hidden'); el.textContent = n; } else el.classList.add('hidden');
+      }
+      refreshNotifs();
+      document.addEventListener('notifications-updated', refreshNotifs);
+    });
+  </script>
+</body>
+</html>
